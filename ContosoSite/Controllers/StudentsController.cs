@@ -58,36 +58,77 @@ namespace ContosoSite.Controllers
             return View(student);
         }
 
-        // GET: Students/Edit/5
-        public ActionResult Edit(int? id)
+        //// GET: Students/Edit/5
+        //public ActionResult Edit(int? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+        //    }
+        //    Student student = db.Students.Find(id);
+        //    if (student == null)
+        //    {
+        //        return HttpNotFound();
+        //    }
+        //    return View(student);
+        //}
+
+        [HttpGet]
+        public ActionResult Edit()
         {
-            if (id == null)
+            List<Student> model = new List<Student>();
+            using (ContosoUniversityDataEntities dc = new ContosoUniversityDataEntities())
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                model = dc.Students.ToList();
             }
-            Student student = db.Students.Find(id);
-            if (student == null)
+            return View(model);
+        }
+
+        [HttpPost]
+        public ActionResult Edit(List<Student> list)
+        {
+            if (ModelState.IsValid)
             {
-                return HttpNotFound();
+                using (ContosoUniversityDataEntities dc = new ContosoUniversityDataEntities())
+                {
+                    foreach (var i in list)
+                    {
+                        var c = dc.Students.Where(a => a.StudentID.Equals(i.StudentID)).FirstOrDefault();
+                        if (c != null)
+                        {
+                            c.LastName = i.LastName;
+                            c.FirstName = i.FirstName;
+                            c.MiddleName = i.MiddleName;
+                            c.EnrollmentDate = i.EnrollmentDate;
+                        }
+                    }
+                    dc.SaveChanges();
+                }
+                ViewBag.Message = "Success";
+                return View(list);
             }
-            return View(student);
+            else
+            {
+                ViewBag.Message = "Failed";
+                return View(list);
+            }
         }
 
         // POST: Students/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "StudentID,LastName,FirstName,EnrollmentDate,MiddleName")] Student student)
-        {
-            if (ModelState.IsValid)
-            {
-                db.Entry(student).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
-            return View(student);
-        }
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public ActionResult Edit([Bind(Include = "StudentID,LastName,FirstName,EnrollmentDate,MiddleName")] Student student)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        db.Entry(student).State = EntityState.Modified;
+        //        db.SaveChanges();
+        //        return RedirectToAction("Index");
+        //    }
+        //    return View(student);
+        //}
 
         // GET: Students/Delete/5
         public ActionResult Delete(int? id)
